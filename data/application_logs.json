@@ -1,0 +1,44 @@
+[
+  {
+    "log_id": "LOG-001",
+    "timestamp": "2026-10-09T10:15:01",
+    "service": "Payment API",
+    "level": "ERROR",
+    "message": "Database connection pool exhausted. No available connections."
+  },
+  {
+    "log_id": "LOG-002",
+    "timestamp": "2026-10-09T10:15:03",
+    "service": "Payment API",
+    "level": "WARNING",
+    "message": "Request waiting for an available database connection."
+  },
+  {
+    "log_id": "LOG-003",
+    "timestamp": "2026-10-09T10:15:05",
+    "service": "Payment API",
+    "level": "ERROR",
+    "message": "Payment request timed out after 4000 milliseconds."
+  },
+  {
+    "log_id": "LOG-004",
+    "timestamp": "2026-10-09T10:15:08",
+    "service": "Payment API",
+    "level": "INFO",
+    "message": "Payment API health check completed successfully."
+  },
+  {
+    "log_id": "LOG-005",
+    "timestamp": "2026-10-09T10:15:10",
+    "service": "Authentication API",
+    "level": "ERROR",
+    "message": "Authentication request failed due to token validation error."
+  },
+  {
+    "log_id": "LOG-006",
+    "timestamp": "2026-10-09T10:15:12",
+    "service": "Payment API",
+    "level": "ERROR",
+    "message": "Database connection acquisition failed while processing payment."
+  }
+] 

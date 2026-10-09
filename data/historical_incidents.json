@@ -1,0 +1,47 @@
+[
+  {
+    "incident_id": "HIST-001",
+    "service": "Payment API",
+    "severity": "HIGH",
+    "symptoms": "Payment API response time increased from 200ms to 4 seconds.",
+    "root_cause": "Database connection pool exhaustion.",
+    "resolution": "Increased database connection pool size and restarted affected application instances.",
+    "tags": ["payment", "database", "latency"]
+  },
+  {
+    "incident_id": "HIST-002",
+    "service": "Payment API",
+    "severity": "MEDIUM",
+    "symptoms": "Intermittent payment failures during peak traffic.",
+    "root_cause": "Database CPU utilization exceeded 90 percent.",
+    "resolution": "Optimized slow queries and increased database capacity.",
+    "tags": ["payment", "database", "cpu"]
+  },
+  {
+    "incident_id": "HIST-003",
+    "service": "Authentication API",
+    "severity": "HIGH",
+    "symptoms": "Users experienced login failures and authentication requests timed out.",
+    "root_cause": "Authentication service memory exhaustion.",
+    "resolution": "Restarted affected instances and increased memory allocation.",
+    "tags": ["authentication", "memory", "timeout"]
+  },
+  {
+    "incident_id": "HIST-004",
+    "service": "Order API",
+    "severity": "CRITICAL",
+    "symptoms": "Order creation requests returned HTTP 500 errors.",
+    "root_cause": "A failed deployment introduced an incompatible API dependency.",
+    "resolution": "Rolled back the deployment and restored the previous dependency version.",
+    "tags": ["orders", "deployment", "api"]
+  },
+  {
+    "incident_id": "HIST-005",
+    "service": "Payment API",
+    "severity": "HIGH",
+    "symptoms": "Payment requests showed increased latency after a new application release.",
+    "root_cause": "Inefficient application code introduced during deployment.",
+    "resolution": "Rolled back the release and deployed a corrected version.",
+    "tags": ["payment", "deployment", "latency"]
+  }
+]
