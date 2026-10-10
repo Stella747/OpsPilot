@@ -14,8 +14,34 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 
+
 app = FastAPI()
+
+# Load the embedding model once when the API starts
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+
+# Load historical incidents once at startup
+with open("data/historical_incidents.json", "r", encoding="utf-8") as file:
+    historical_incidents = json.load(file)
+
+# Convert historical incidents into searchable text
+historical_incident_texts = [
+    (
+        f"Service: {item['service']}. "
+        f"Severity: {item['severity']}. "
+        f"Symptoms: {item['symptoms']}. "
+        f"Root cause: {item['root_cause']}. "
+        f"Resolution: {item['resolution']}. "
+        f"Tags: {', '.join(item['tags'])}."
+    )
+    for item in historical_incidents
+]
+
+# Calculate historical embeddings once at startup
+historical_embeddings = embedding_model.encode(
+    historical_incident_texts
+)
+
 
 
 class Incident(BaseModel):
@@ -121,10 +147,6 @@ def investigate_incident_with_ai(
         and log["level"] in ["ERROR", "WARNING"]
     ]
 
-    # 3. Load historical incidents
-    with open("data/historical_incidents.json", "r") as file:
-        historical_incidents = json.load(file)
-
     # 4. Find similar historical incidents
     model = embedding_model
 
@@ -152,7 +174,7 @@ def investigate_incident_with_ai(
 
     similarities = cosine_similarity(
         query_embedding,
-        incident_embeddings
+        historical_embeddings
     )[0]
 
     ranked_incidents = sorted(
