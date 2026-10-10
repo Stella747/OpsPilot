@@ -6,7 +6,16 @@ from database import SessionLocal
 from models import IncidentDB
 
 
+import json
+import ollama
+
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+
+
+
 app = FastAPI()
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 
 class Incident(BaseModel):
@@ -84,3 +93,151 @@ def get_incident(
         )
 
     return incident
+
+
+@app.post("/incidents/{incident_id}/investigate")
+def investigate_incident_with_ai(
+    incident_id: str,
+    db: Session = Depends(get_db)
+):
+    # 1. Retrieve the incident from SQLite
+    incident = db.query(IncidentDB).filter(
+        IncidentDB.id == incident_id
+    ).first()
+
+    if not incident:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Incident {incident_id} not found"
+        )
+
+    # 2. Load application logs
+    with open("data/application_logs.json", "r") as file:
+        application_logs = json.load(file)
+
+    important_logs = [
+        log for log in application_logs
+        if log["service"] == incident.service
+        and log["level"] in ["ERROR", "WARNING"]
+    ]
+
+    # 3. Load historical incidents
+    with open("data/historical_incidents.json", "r") as file:
+        historical_incidents = json.load(file)
+
+    # 4. Find similar historical incidents
+    model = embedding_model
+
+    incident_texts = [
+        (
+            f"Service: {item['service']}. "
+            f"Severity: {item['severity']}. "
+            f"Symptoms: {item['symptoms']}. "
+            f"Root cause: {item['root_cause']}. "
+            f"Resolution: {item['resolution']}. "
+            f"Tags: {', '.join(item['tags'])}."
+        )
+        for item in historical_incidents
+    ]
+
+    incident_embeddings = model.encode(incident_texts)
+
+    query = (
+        f"Service: {incident.service}. "
+        f"Severity: {incident.severity}. "
+        f"Description: {incident.description}."
+    )
+
+    query_embedding = model.encode([query])
+
+    similarities = cosine_similarity(
+        query_embedding,
+        incident_embeddings
+    )[0]
+
+    ranked_incidents = sorted(
+        zip(historical_incidents, similarities),
+        key=lambda item: item[1],
+        reverse=True
+    )
+
+    top_matches = [
+        {
+            "incident_id": item["incident_id"],
+            "similarity": round(float(score), 4),
+            "root_cause": item["root_cause"],
+            "resolution": item["resolution"]
+        }
+        for item, score in ranked_incidents[:3]
+    ]
+
+    # 5. Prepare evidence for Qwen
+    evidence = {
+        "incident": {
+            "id": incident.id,
+            "service": incident.service,
+            "severity": incident.severity,
+            "description": incident.description
+        },
+        "application_logs": [
+            {
+                "timestamp": log["timestamp"],
+                "level": log["level"],
+                "message": log["message"]
+            }
+            for log in important_logs
+        ],
+        "similar_historical_incidents": top_matches
+    }
+
+    prompt = f"""
+You are OpsPilot, an IT incident investigation assistant.
+
+Analyze the evidence below:
+
+{json.dumps(evidence, indent=2)}
+
+Produce a report with:
+1. Incident summary
+2. Observed evidence
+3. Most likely hypothesis
+4. Recommended investigation steps
+5. Confidence and limitations
+
+Rules:
+- Separate observed facts from hypotheses.
+- Do not claim the root cause is confirmed.
+- Use historical similarity as supporting evidence, not proof.
+- Do not invent facts or metrics.
+- Do not claim to have executed remediation.
+- Recommend validation before production changes.
+- Use only timestamps explicitly supplied in the evidence.
+- Never invent timestamps, metrics, or incident details.
+- If information is missing, state that it is unavailable.
+"""
+
+    # 6. Generate the report with the local model
+    try:
+        response = ollama.chat(
+            model="qwen2.5:1.5b",
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Local AI model is unavailable: {exc}"
+        ) from exc
+
+    return {
+        "incident_id": incident.id,
+        "service": incident.service,
+        "severity": incident.severity,
+        "important_logs_count": len(important_logs),
+        "similar_incidents": top_matches,
+        "investigation_report": response["message"]["content"]
+    }
