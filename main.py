@@ -14,6 +14,14 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 
+SIMILARITY_THRESHOLD = 0.40
+
+def has_sufficient_historical_evidence(
+    best_similarity: float,
+    threshold: float = SIMILARITY_THRESHOLD,
+) -> bool:
+    """Return whether the best historical match meets the threshold."""
+    return best_similarity >= threshold
 
 app = FastAPI()
 
@@ -147,7 +155,7 @@ def investigate_incident_with_ai(
         and log["level"] in ["ERROR", "WARNING"]
     ]
 
-    # 4. Find similar historical incidents
+    # 4. Find similar historical incidents using cached embeddings
     model = embedding_model
 
     incident_texts = [
@@ -192,6 +200,32 @@ def investigate_incident_with_ai(
         }
         for item, score in ranked_incidents[:3]
     ]
+    # Check whether the best historical match meets the threshold
+    best_similarity = top_matches[0]["similarity"] if top_matches else 0.0
+
+    #stop historical based recommendations when evidence is weak
+    sufficient_historical_evidence= (has_sufficient_historical_evidence(best_similarity,SIMILARITY_THRESHOLD,))
+    if not sufficient_historical_evidence:
+        return {
+            "incident_id": incident.id,
+            "service": incident.service,
+            "severity": incident.severity,
+            "important_logs_count": len(important_logs),
+            "similar_incidents": top_matches,
+            "investigation_report": (
+                "Insufficient historical evidence. "
+                "The closest historical incident did not meet "
+                "the configured similarity threshold. "
+                "Do not assume it's root casue or resolution applies. "
+                "Investigate the current incident using it's own logs, "
+                "system metrics, and service health information."
+            ),
+            "best_similarity": best_similarity,
+            "similarity_threshold": SIMILARITY_THRESHOLD,
+            "sufficient_historical_evidence": False,
+        }
+
+
 
     # 5. Prepare evidence for Qwen
     evidence = {
@@ -236,6 +270,9 @@ Rules:
 - Use only timestamps explicitly supplied in the evidence.
 - Never invent timestamps, metrics, or incident details.
 - If information is missing, state that it is unavailable.
+- If historical evidence is insufficient, explicitly say so.
+- Do not recommend a historical resolution as applicable when the evidence is weak.
+- Distinguish observed logs from historical similarities and hypotheses.
 """
 
     # 6. Generate the report with the local model
@@ -261,5 +298,8 @@ Rules:
         "severity": incident.severity,
         "important_logs_count": len(important_logs),
         "similar_incidents": top_matches,
-        "investigation_report": response["message"]["content"]
+        "investigation_report": response["message"]["content"],
+        "best_similarity": best_similarity,
+        "similarity_threshold": SIMILARITY_THRESHOLD,
+        "sufficient_historical_evidence": sufficient_historical_evidence,
     }
