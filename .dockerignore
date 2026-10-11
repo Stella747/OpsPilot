@@ -1,0 +1,12 @@
+.git
+.venv
+__pycache__
+.pytest_cache
+*.py[cod]
+opspilot.db
+*.db
+.env
+.env.*
+.cache
+model-cache
+hf_cache

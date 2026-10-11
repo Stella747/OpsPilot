@@ -1,4 +1,5 @@
 import json
+import ollama
 
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -210,3 +211,79 @@ if results:
         "possible explanation, not a confirmed root cause."
     )
 
+
+# --------------------------------------------------
+# 10. Generate an AI investigation report
+# --------------------------------------------------
+
+top_historical_incidents = []
+
+for historical_incident, similarity in results[:3]:
+    top_historical_incidents.append({
+        "incident_id": historical_incident["incident_id"],
+        "similarity": round(float(similarity), 4),
+        "root_cause": historical_incident["root_cause"],
+        "resolution": historical_incident["resolution"]
+    })
+
+
+# Prepare the evidence for Qwen
+incident_evidence = {
+    "incident": {
+        "id": incident.id,
+        "service": incident.service,
+        "severity": incident.severity,
+        "description": incident.description
+    },
+    "application_logs": [
+        {
+            "level": log["level"],
+            "message": log["message"]
+        }
+        for log in important_logs
+    ],
+    "similar_historical_incidents": top_historical_incidents
+}
+
+
+prompt = f"""
+You are OpsPilot, an IT incident investigation assistant.
+
+Investigate the current incident using only the evidence below.
+
+EVIDENCE:
+{json.dumps(incident_evidence, indent=2)}
+
+Write a report with these sections:
+1. Incident summary
+2. Observed evidence
+3. Most likely hypothesis
+4. Recommended investigation steps
+5. Confidence and limitations
+
+Rules:
+- Distinguish observed facts from hypotheses.
+- Do not claim the root cause is confirmed.
+- Use historical similarity as supporting evidence, not proof.
+- Do not invent metrics or facts that are not provided.
+- Do not claim to have executed any remediation.
+- Recommend investigation before production changes.
+"""
+
+
+print()
+print("=" * 60)
+print("GENERATING AI INVESTIGATION REPORT...")
+print("=" * 60)
+
+response = ollama.chat(
+    model="qwen2.5:3b",
+    messages=[
+        {
+            "role": "user",
+            "content": prompt
+        }
+    ]
+)
+
+print(response["message"]["content"])

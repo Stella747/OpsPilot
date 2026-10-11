@@ -81,6 +81,12 @@ Rules:
 - Do not claim that you executed remediation.
 - Recommend validation before production changes.
 - Explicitly identify missing information.
+- Do not use "confirmed", "certain", or "highly likely" unless the supplied evidence justifies that confidence.
+- State which observations directly support each hypothesis.
+- Explicitly list important alternative explanations when evidence is incomplete.
+- Do not recommend increasing connection pool size or restarting instances without first checking connection usage, pool configuration, active sessions, and application health.
+- Historical resolutions must be presented as options to investigate, not automatic actions to repeat.
+
 """
 
 print("Generating report with local Ollama model...")

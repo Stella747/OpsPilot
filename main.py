@@ -7,6 +7,8 @@ from models import IncidentDB
 
 
 import json
+import os
+from pathlib import Path
 import ollama
 
 from sentence_transformers import SentenceTransformer
@@ -14,7 +16,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 
-SIMILARITY_THRESHOLD = 0.40
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / "data"
+SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.40"))
+AI_PROVIDER = os.getenv("AI_PROVIDER", "ollama").lower()
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:1.5b")
 
 def has_sufficient_historical_evidence(
     best_similarity: float,
@@ -23,13 +29,13 @@ def has_sufficient_historical_evidence(
     """Return whether the best historical match meets the threshold."""
     return best_similarity >= threshold
 
-app = FastAPI()
+app = FastAPI(title="OpsPilot", description="Synthetic-data incident investigation demo")
 
 # Load the embedding model once when the API starts
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # Load historical incidents once at startup
-with open("data/historical_incidents.json", "r", encoding="utf-8") as file:
+with (DATA_DIR / "historical_incidents.json").open("r", encoding="utf-8") as file:
     historical_incidents = json.load(file)
 
 # Convert historical incidents into searchable text
@@ -146,7 +152,7 @@ def investigate_incident_with_ai(
         )
 
     # 2. Load application logs
-    with open("data/application_logs.json", "r") as file:
+    with (DATA_DIR / "application_logs.json").open("r", encoding="utf-8") as file:
         application_logs = json.load(file)
 
     important_logs = [
@@ -273,12 +279,39 @@ Rules:
 - If historical evidence is insufficient, explicitly say so.
 - Do not recommend a historical resolution as applicable when the evidence is weak.
 - Distinguish observed logs from historical similarities and hypotheses.
+- Do not use "confirmed", "certain", or "highly likely" unless the supplied evidence justifies that confidence.
+- State which observations directly support each hypothesis.
+- Explicitly list important alternative explanations when evidence is incomplete.
+- Do not recommend increasing connection pool size or restarting instances without first checking connection usage, pool configuration, active sessions, and application health.
+- Historical resolutions must be presented as options to investigate, not automatic actions to repeat.
+
 """
 
-    # 6. Generate the report with the local model
+    # Retrieval and evidence summary work without a language model.
+    if AI_PROVIDER == "disabled":
+        return {
+            "incident_id": incident.id,
+            "service": incident.service,
+            "severity": incident.severity,
+            "important_logs_count": len(important_logs),
+            "similar_incidents": top_matches,
+            "investigation_report": (
+                "Hosted language-model inference is disabled. This report "
+                "contains retrieval evidence only; review the listed logs and "
+                "historical matches manually. No root cause is confirmed."
+            ),
+            "best_similarity": best_similarity,
+            "similarity_threshold": SIMILARITY_THRESHOLD,
+            "sufficient_historical_evidence": sufficient_historical_evidence,
+        }
+
+    if AI_PROVIDER != "ollama":
+        raise HTTPException(status_code=503, detail="AI_PROVIDER must be 'ollama' or 'disabled'")
+
+    # 6. Generate the report with the configured Ollama service
     try:
         response = ollama.chat(
-            model="qwen2.5:1.5b",
+            model=OLLAMA_MODEL,
             messages=[
                 {
                     "role": "user",

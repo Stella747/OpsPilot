@@ -1,44 +1,36 @@
 [
-  {
-    "log_id": "LOG-001",
-    "timestamp": "2026-10-09T10:15:01",
-    "service": "Payment API",
-    "level": "ERROR",
-    "message": "Database connection pool exhausted. No available connections."
-  },
-  {
-    "log_id": "LOG-002",
-    "timestamp": "2026-10-09T10:15:03",
-    "service": "Payment API",
-    "level": "WARNING",
-    "message": "Request waiting for an available database connection."
-  },
-  {
-    "log_id": "LOG-003",
-    "timestamp": "2026-10-09T10:15:05",
-    "service": "Payment API",
-    "level": "ERROR",
-    "message": "Payment request timed out after 4000 milliseconds."
-  },
-  {
-    "log_id": "LOG-004",
-    "timestamp": "2026-10-09T10:15:08",
-    "service": "Payment API",
-    "level": "INFO",
-    "message": "Payment API health check completed successfully."
-  },
-  {
-    "log_id": "LOG-005",
-    "timestamp": "2026-10-09T10:15:10",
-    "service": "Authentication API",
-    "level": "ERROR",
-    "message": "Authentication request failed due to token validation error."
-  },
-  {
-    "log_id": "LOG-006",
-    "timestamp": "2026-10-09T10:15:12",
-    "service": "Payment API",
-    "level": "ERROR",
-    "message": "Database connection acquisition failed while processing payment."
-  }
-] 
+  {"log_id":"LOG-001","timestamp":"2026-10-09T10:15:01Z","service":"Payment API","level":"ERROR","message":"Database connection pool exhausted. No available connections.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-002","timestamp":"2026-10-09T10:15:03Z","service":"Payment API","level":"WARNING","message":"Request waiting for an available database connection.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-003","timestamp":"2026-10-09T10:15:05Z","service":"Payment API","level":"ERROR","message":"Payment request timed out after 4000 milliseconds.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-004","timestamp":"2026-10-09T10:15:08Z","service":"Payment API","level":"INFO","message":"Payment API health check completed successfully.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-005","timestamp":"2026-10-09T10:15:10Z","service":"Authentication API","level":"ERROR","message":"Authentication request failed due to token validation error.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-006","timestamp":"2026-10-09T10:15:12Z","service":"Payment API","level":"ERROR","message":"Database connection acquisition failed while processing payment.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-007","timestamp":"2026-10-09T10:16:00Z","service":"Payment API","level":"WARNING","message":"Transaction history query exceeded the expected execution window.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-008","timestamp":"2026-10-09T10:16:04Z","service":"Payment API","level":"ERROR","message":"Database CPU alert threshold exceeded for the payment workload.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-009","timestamp":"2026-10-09T10:17:11Z","service":"Authentication API","level":"WARNING","message":"Worker memory usage is approaching the configured limit.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-010","timestamp":"2026-10-09T10:17:20Z","service":"Authentication API","level":"ERROR","message":"Authentication worker restarted after memory limit was reached.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-011","timestamp":"2026-10-09T10:18:02Z","service":"Order API","level":"ERROR","message":"Order creation returned HTTP 500 after dependency initialization failed.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-012","timestamp":"2026-10-09T10:18:15Z","service":"Order API","level":"WARNING","message":"Deployed dependency version differs from the last known working release.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-013","timestamp":"2026-10-09T10:19:01Z","service":"Payment API","level":"WARNING","message":"Request CPU time increased following the latest application release.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-014","timestamp":"2026-10-09T10:19:07Z","service":"Payment API","level":"ERROR","message":"Payment handler exceeded its response latency objective.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-015","timestamp":"2026-10-09T10:20:00Z","service":"Notification Worker","level":"WARNING","message":"Email provider returned a rate-limit response; retry scheduled.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-016","timestamp":"2026-10-09T10:20:10Z","service":"Notification Worker","level":"ERROR","message":"Notification queue age exceeded the expected delivery window.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-017","timestamp":"2026-10-09T10:21:02Z","service":"Search API","level":"ERROR","message":"Search cluster returned 503 while shard allocation was incomplete.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-018","timestamp":"2026-10-09T10:21:18Z","service":"Search API","level":"WARNING","message":"One search node is unavailable; cluster health is yellow.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-019","timestamp":"2026-10-09T10:22:03Z","service":"Inventory Service","level":"WARNING","message":"Inventory projection consumer lag is above the normal range.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-020","timestamp":"2026-10-09T10:22:09Z","service":"Inventory Service","level":"ERROR","message":"Inventory read model version is behind the latest source event offset.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-021","timestamp":"2026-10-09T10:23:00Z","service":"Shipping API","level":"WARNING","message":"Carrier integration response time exceeded the client timeout budget.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-022","timestamp":"2026-10-09T10:23:05Z","service":"Shipping API","level":"ERROR","message":"Outbound worker queue is saturated by pending carrier requests.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-023","timestamp":"2026-10-09T10:24:01Z","service":"Reporting API","level":"WARNING","message":"Report query scanned more date partitions than expected.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-024","timestamp":"2026-10-09T10:24:09Z","service":"Reporting API","level":"ERROR","message":"Scheduled report exceeded its job execution time budget.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-025","timestamp":"2026-10-09T10:25:02Z","service":"Authentication API","level":"WARNING","message":"Token refresh timestamp differs from identity provider time.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-026","timestamp":"2026-10-09T10:25:08Z","service":"Authentication API","level":"ERROR","message":"Token validation failed because the token is not yet valid.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-027","timestamp":"2026-10-09T10:26:01Z","service":"Catalog API","level":"WARNING","message":"Product cache entry is older than the latest catalog update event.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-028","timestamp":"2026-10-09T10:26:06Z","service":"Catalog API","level":"ERROR","message":"Cache invalidation event was not acknowledged after broker reconnect.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-029","timestamp":"2026-10-09T10:27:02Z","service":"Order API","level":"WARNING","message":"Order event consumer retry count is increasing.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-030","timestamp":"2026-10-09T10:27:10Z","service":"Order API","level":"ERROR","message":"Database connection acquisition failed in order event consumer.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-031","timestamp":"2026-10-09T10:28:03Z","service":"Payment API","level":"WARNING","message":"Payment gateway returned a transient 502 response.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-032","timestamp":"2026-10-09T10:28:08Z","service":"Payment API","level":"ERROR","message":"Upstream payment gateway request failed with HTTP 502.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-033","timestamp":"2026-10-09T10:29:01Z","service":"Image Service","level":"WARNING","message":"Upload request body exceeded reverse proxy configured size limit.","data_classification":"SYNTHETIC"},
+  {"log_id":"LOG-034","timestamp":"2026-10-09T10:29:05Z","service":"Image Service","level":"ERROR","message":"Image upload rejected with HTTP 413 before reaching the application.","data_classification":"SYNTHETIC"}
+]

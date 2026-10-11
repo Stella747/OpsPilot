@@ -1,47 +1,17 @@
 [
-  {
-    "incident_id": "HIST-001",
-    "service": "Payment API",
-    "severity": "HIGH",
-    "symptoms": "Payment API response time increased from 200ms to 4 seconds.",
-    "root_cause": "Database connection pool exhaustion.",
-    "resolution": "Increased database connection pool size and restarted affected application instances.",
-    "tags": ["payment", "database", "latency"]
-  },
-  {
-    "incident_id": "HIST-002",
-    "service": "Payment API",
-    "severity": "MEDIUM",
-    "symptoms": "Intermittent payment failures during peak traffic.",
-    "root_cause": "Database CPU utilization exceeded 90 percent.",
-    "resolution": "Optimized slow queries and increased database capacity.",
-    "tags": ["payment", "database", "cpu"]
-  },
-  {
-    "incident_id": "HIST-003",
-    "service": "Authentication API",
-    "severity": "HIGH",
-    "symptoms": "Users experienced login failures and authentication requests timed out.",
-    "root_cause": "Authentication service memory exhaustion.",
-    "resolution": "Restarted affected instances and increased memory allocation.",
-    "tags": ["authentication", "memory", "timeout"]
-  },
-  {
-    "incident_id": "HIST-004",
-    "service": "Order API",
-    "severity": "CRITICAL",
-    "symptoms": "Order creation requests returned HTTP 500 errors.",
-    "root_cause": "A failed deployment introduced an incompatible API dependency.",
-    "resolution": "Rolled back the deployment and restored the previous dependency version.",
-    "tags": ["orders", "deployment", "api"]
-  },
-  {
-    "incident_id": "HIST-005",
-    "service": "Payment API",
-    "severity": "HIGH",
-    "symptoms": "Payment requests showed increased latency after a new application release.",
-    "root_cause": "Inefficient application code introduced during deployment.",
-    "resolution": "Rolled back the release and deployed a corrected version.",
-    "tags": ["payment", "deployment", "latency"]
-  }
+  {"incident_id":"HIST-001","service":"Payment API","severity":"HIGH","symptoms":"Payment API response time increased from 200ms to 4 seconds during peak checkout traffic.","root_cause":"Database connection pool exhaustion.","resolution":"Validated pool utilization and active sessions, then adjusted pool limits and restarted affected application instances.","tags":["payment","database","latency","connection-pool"],"data_classification":"SYNTHETIC"},
+  {"incident_id":"HIST-002","service":"Payment API","severity":"MEDIUM","symptoms":"Intermittent payment failures during peak traffic with elevated database CPU.","root_cause":"Database CPU utilization exceeded 90 percent due to unindexed transaction history queries.","resolution":"Reviewed query plans, added an index after validation, and increased database capacity for the peak window.","tags":["payment","database","cpu","query-performance"],"data_classification":"SYNTHETIC"},
+  {"incident_id":"HIST-003","service":"Authentication API","severity":"HIGH","symptoms":"Users experienced login failures and authentication requests timed out.","root_cause":"Authentication service memory pressure caused repeated worker restarts.","resolution":"Compared heap and worker metrics, fixed a token cache retention issue, and restarted affected instances.","tags":["authentication","memory","timeout"],"data_classification":"SYNTHETIC"},
+  {"incident_id":"HIST-004","service":"Order API","severity":"CRITICAL","symptoms":"Order creation requests returned HTTP 500 errors after a release.","root_cause":"A deployment introduced an incompatible API dependency.","resolution":"Rolled back the release and restored the prior dependency after confirming the error rate declined.","tags":["orders","deployment","api","http-500"],"data_classification":"SYNTHETIC"},
+  {"incident_id":"HIST-005","service":"Payment API","severity":"HIGH","symptoms":"Payment requests showed increased latency after a new application release.","root_cause":"Inefficient serialization code introduced during deployment increased request CPU time.","resolution":"Compared release performance, rolled back the change, and deployed a corrected version after review.","tags":["payment","deployment","latency","cpu"],"data_classification":"SYNTHETIC"},
+  {"incident_id":"HIST-006","service":"Notification Worker","severity":"MEDIUM","symptoms":"Email notifications were delayed and the worker queue backlog grew steadily.","root_cause":"A downstream email provider rate limit caused retries to accumulate.","resolution":"Checked provider response codes, applied bounded backoff, and drained the backlog gradually.","tags":["notifications","queue","rate-limit","retry"],"data_classification":"SYNTHETIC"},
+  {"incident_id":"HIST-007","service":"Search API","severity":"HIGH","symptoms":"Search requests returned intermittent 503 responses and elevated latency.","root_cause":"Search cluster shard allocation was constrained after one node became unavailable.","resolution":"Verified cluster health and disk capacity, restored the node, and monitored shard recovery.","tags":["search","availability","cluster","503"],"data_classification":"SYNTHETIC"},
+  {"incident_id":"HIST-008","service":"Inventory Service","severity":"MEDIUM","symptoms":"Available stock values differed between checkout and the inventory endpoint.","root_cause":"A delayed event consumer left the read model behind the source of truth.","resolution":"Compared event offsets, resumed the consumer after validating replay safety, and reconciled affected records.","tags":["inventory","events","data-consistency","consumer-lag"],"data_classification":"SYNTHETIC"},
+  {"incident_id":"HIST-009","service":"Shipping API","severity":"HIGH","symptoms":"Label creation requests timed out while calls to a carrier integration were slow.","root_cause":"Carrier API response time exceeded the client timeout and saturated outbound workers.","resolution":"Reviewed carrier status and worker saturation, then used bounded concurrency and retry limits.","tags":["shipping","integration","timeout","worker-pool"],"data_classification":"SYNTHETIC"},
+  {"incident_id":"HIST-010","service":"Reporting API","severity":"LOW","symptoms":"Scheduled report generation missed its completion window.","root_cause":"A large report query scanned an unpartitioned date range and exceeded its job time budget.","resolution":"Reviewed query plan and job duration, narrowed the date range, and scheduled the heavier report off peak.","tags":["reporting","batch","query-performance","timeout"],"data_classification":"SYNTHETIC"},
+  {"incident_id":"HIST-011","service":"Authentication API","severity":"MEDIUM","symptoms":"Users were intermittently logged out after token refresh requests failed.","root_cause":"Clock skew between application instances and the identity provider caused token validation failures.","resolution":"Compared synchronized timestamps and token expiry claims, corrected time synchronization, and monitored refresh success.","tags":["authentication","token","clock-skew","identity"],"data_classification":"SYNTHETIC"},
+  {"incident_id":"HIST-012","service":"Catalog API","severity":"MEDIUM","symptoms":"Product detail requests returned stale prices for a subset of items.","root_cause":"Cache invalidation events were dropped during a brief message broker reconnect.","resolution":"Checked broker offsets and cache age, replayed safe invalidation events, and verified values against the source database.","tags":["catalog","cache","broker","stale-data"],"data_classification":"SYNTHETIC"},
+  {"incident_id":"HIST-013","service":"Order API","severity":"HIGH","symptoms":"Order status updates stopped appearing in the customer portal.","root_cause":"The order event consumer exhausted its database write connections after a retry loop.","resolution":"Inspected consumer logs and connection metrics, bounded retries, and resumed processing after clearing the stuck batch.","tags":["orders","database","connection-pool","consumer"],"data_classification":"SYNTHETIC"},
+  {"incident_id":"HIST-014","service":"Payment API","severity":"MEDIUM","symptoms":"A small number of payment requests were rejected with gateway errors while the API health check remained available.","root_cause":"An upstream payment gateway returned transient 502 responses.","resolution":"Compared gateway response codes and request IDs, checked provider status, and verified bounded retry behavior.","tags":["payment","gateway","502","upstream"],"data_classification":"SYNTHETIC"},
+  {"incident_id":"HIST-015","service":"Image Service","severity":"LOW","symptoms":"Image upload requests failed when uploaded files were larger than the configured limit.","root_cause":"The reverse proxy body-size limit was lower than the documented client upload limit.","resolution":"Compared proxy and application limits, aligned the setting with the product requirement, and validated representative uploads.","tags":["images","proxy","configuration","upload"],"data_classification":"SYNTHETIC"}
 ]

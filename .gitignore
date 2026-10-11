@@ -1,5 +1,12 @@
 .venv/
 __pycache__/
+.pytest_cache/
 *.pyc
 opspilot.db
+*.db
 .env
+.env.*
+!.env.example
+.cache/
+model-cache/
+hf_cache/

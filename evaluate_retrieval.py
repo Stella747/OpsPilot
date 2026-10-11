@@ -9,9 +9,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 # --------------------------------------------------
 # 1. Load historical incidents
 # --------------------------------------------------
-
 BASE_DIR = Path(__file__).resolve().parent
 DATA_FILE = BASE_DIR / "data" / "historical_incidents.json"
+EVALUATION_FILE = BASE_DIR / "data" / "retrieval_evaluation_cases.json"
 
 with DATA_FILE.open("r", encoding="utf-8") as file:
     historical_incidents = json.load(file)
@@ -40,54 +40,12 @@ historical_texts = [
 
 
 # --------------------------------------------------
-# 3. Define evaluation test cases
+# 3. Load labeled synthetic evaluation cases
 # --------------------------------------------------
 
-# These are synthetic queries based on known historical cases.
-# Each expected ID is the case we want retrieval to find.
+with EVALUATION_FILE.open("r", encoding="utf-8") as file:
+    test_cases = json.load(file)
 
-test_cases = [
-    {
-        "name": "Payment connection pool exhaustion",
-        "query": (
-            "Payment API is slow because database connections "
-            "are exhausted and requests are waiting for connections."
-        ),
-        "expected_id": "HIST-001",
-    },
-    {
-        "name": "Payment database CPU overload",
-        "query": (
-            "Payment requests are failing while database CPU "
-            "usage is extremely high."
-        ),
-        "expected_id": "HIST-002",
-    },
-    {
-        "name": "Authentication failures",
-        "query": (
-            "Auth API users cannot authenticate and are receiving "
-            "authentication failures."
-        ),
-        "expected_id": "HIST-003",
-    },
-    {
-        "name": "Order processing delays",
-        "query": (
-            "Order API requests are delayed because messages "
-            "are accumulating in the processing queue."
-        ),
-        "expected_id": "HIST-004",
-    },
-    {
-        "name": "Payment latency after deployment",
-        "query": (
-            "Payment API latency increased after a new software "
-            "release was deployed."
-        ),
-        "expected_id": "HIST-005",
-    },
-]
 
 
 # --------------------------------------------------
@@ -117,6 +75,7 @@ similarity_matrix = cosine_similarity(
 )
 
 
+
 # --------------------------------------------------
 # 5. Evaluate retrieval quality
 # --------------------------------------------------
@@ -124,6 +83,9 @@ similarity_matrix = cosine_similarity(
 hits_at_1 = 0
 hits_at_3 = 0
 reciprocal_ranks = []
+positive_cases = 0
+negative_cases = 0
+negative_rejections = 0
 
 print("\n" + "=" * 72)
 print("OPSPILOT — SEMANTIC RETRIEVAL EVALUATION")
@@ -131,7 +93,6 @@ print("=" * 72)
 
 for index, case in enumerate(test_cases):
     scores = similarity_matrix[index]
-
     ranked_indices = scores.argsort()[::-1]
 
     ranked_ids = [
@@ -140,6 +101,25 @@ for index, case in enumerate(test_cases):
     ]
 
     expected_id = case["expected_id"]
+    top_score = float(scores.max())
+
+    print(f"\nTest case: {case['name']}")
+    print(f"Top similarity score: {top_score:.4f}")
+    print(f"Actual top match: {ranked_ids[0]}")
+
+    # Negative case: no expected historical match
+    if expected_id is None:
+        negative_cases += 1
+        rejected = top_score < 0.40
+        negative_rejections += int(rejected)
+        print("Expected incident: No relevant historical match")
+        print(f"Threshold 0.40 rejection: {'PASS' if rejected else 'REVIEW'}")
+        continue
+
+    # Positive case: an expected historical incident exists
+    positive_cases += 1
+
+    print(f"Expected incident: {expected_id}")
 
     if ranked_ids[0] == expected_id:
         hits_at_1 += 1
@@ -150,34 +130,37 @@ for index, case in enumerate(test_cases):
     if expected_id in ranked_ids:
         rank = ranked_ids.index(expected_id) + 1
         reciprocal_ranks.append(1 / rank)
+        print(f"Expected incident rank: {rank}")
     else:
-        rank = None
         reciprocal_ranks.append(0.0)
+        print("Expected incident rank: Not retrieved")
 
-    print(f"\nTest case: {case['name']}")
-    print(f"Expected incident: {expected_id}")
-    print(f"Actual top match:  {ranked_ids[0]}")
-    print(f"Expected incident rank: {rank or 'Not retrieved'}")
     print(f"Top 3 results: {ranked_ids[:3]}")
+
 
 
 # --------------------------------------------------
 # 6. Report aggregate metrics
 # --------------------------------------------------
 
-total = len(test_cases)
-
-hit_at_1 = hits_at_1 / total
-hit_at_3 = hits_at_3 / total
-mrr = sum(reciprocal_ranks) / total
-
 print("\n" + "=" * 72)
 print("AGGREGATE METRICS")
 print("=" * 72)
 
-print(f"Test cases: {total}")
-print(f"Hit@1: {hit_at_1:.2%}")
-print(f"Hit@3: {hit_at_3:.2%}")
-print(f"Mean Reciprocal Rank (MRR): {mrr:.4f}")
+print(f"Positive test cases: {positive_cases}")
+print(f"Negative test cases: {negative_cases}")
+
+if positive_cases > 0:
+    print(f"Hit@1: {hits_at_1 / positive_cases:.2%}")
+    print(f"Hit@3: {hits_at_3 / positive_cases:.2%}")
+    print(
+        "Mean Reciprocal Rank (MRR): "
+        f"{sum(reciprocal_ranks) / positive_cases:.4f}"
+    )
+else:
+    print("No positive test cases were evaluated.")
+
+if negative_cases:
+    print(f"Negative rejection rate at 0.40: {negative_rejections / negative_cases:.2%}")
 
 print("\nEvaluation completed.")

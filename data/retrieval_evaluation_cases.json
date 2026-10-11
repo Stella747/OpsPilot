@@ -1,0 +1,18 @@
+[
+  {"case_id":"EVAL-001","name":"Payment connection pool exhaustion","query":"Payment API latency is high because database connections are exhausted.","expected_id":"HIST-001","data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-002","name":"Payment requests waiting for connections","query":"Checkout calls time out while waiting to acquire a database connection.","expected_id":"HIST-001","data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-003","name":"Payment database CPU overload","query":"Payment transactions fail when slow queries push database CPU above normal levels.","expected_id":"HIST-002","data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-004","name":"Authentication worker memory pressure","query":"Login requests fail while authentication workers restart after reaching their memory limit.","expected_id":"HIST-003","data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-005","name":"Order API incompatible release","query":"Order creation returns server errors after a dependency change was deployed.","expected_id":"HIST-004","data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-006","name":"Payment latency after release","query":"The latest payment application version increased request processing time.","expected_id":"HIST-005","data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-007","name":"Notification queue rate limiting","query":"Email delivery is delayed because provider throttling causes retries and backlog.","expected_id":"HIST-006","data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-008","name":"Search cluster node unavailable","query":"Search returns service unavailable responses while a node is down and shards rebalance.","expected_id":"HIST-007","data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-009","name":"Inventory event consumer lag","query":"Inventory values are stale because the read model consumer is behind source events.","expected_id":"HIST-008","data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-010","name":"Carrier integration timeout","query":"Shipping labels time out because the external carrier responds slowly and workers are full.","expected_id":"HIST-009","data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-011","name":"Unrelated disk failure","query":"A host disk failed and the filesystem became read-only, preventing local writes.","expected_id":null,"data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-012","name":"Unrelated DNS certificate issue","query":"A TLS certificate expired on a public DNS provider and browsers reject the site.","expected_id":null,"data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-013","name":"Catalog stale cached prices","query":"Some product prices remain outdated because cache invalidation messages were lost.","expected_id":"HIST-012","data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-014","name":"Order consumer connection retries","query":"Order status events stop processing after repeated database connection acquisition failures.","expected_id":"HIST-013","data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-015","name":"Payment gateway transient errors","query":"A payment provider returns intermittent 502 errors while local health checks still pass.","expected_id":"HIST-014","data_classification":"SYNTHETIC"},
+  {"case_id":"EVAL-016","name":"Image upload limit mismatch","query":"Large uploads receive a 413 response from the reverse proxy before the app sees them.","expected_id":"HIST-015","data_classification":"SYNTHETIC"}
+]
